@@ -6,12 +6,14 @@ This Ansible project serves as a sample for efficiently deploying Guardicore age
 
 ## Project Structure
 
+```
 ./
 ├── ansible.cfg
 ├── group_vars
 │ └── guardicore_ubuntu.yml #create separately
 ├── guardicore.yml
 └── linode.yml
+```
 
 ## Prerequisites
 
@@ -57,10 +59,14 @@ gc_installation_cmd: 'sudo -E bash /tmp/guardicore_install.sh'
 
 4. Set up Linode API Token:
 
-To dynamically retrieve the current list of instances using the Ansible dynamic inventory plugin for Linode, follow these steps:
-Use the Ansible dynamic inventory plugin for Linode. You can find detailed information about this plugin at:
+To dynamically retrieve the current list of instances using the Ansible dynamic inventory plugin for Linode, follow these steps
+
+Use the Ansible dynamic inventory plugin for Linode. You can find detailed information about this plugin at
+
 https://docs.ansible.com/ansible/latest/collections/community/general/linode_inventory.html
+
 For setting environment variables, we recommend using envrc.
+
 This approach allows you to dynamically fetch and manage your Linode instances within your Ansible environment, providing an up-to-date inventory for your playbooks
 
 ```
