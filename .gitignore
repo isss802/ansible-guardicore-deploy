@@ -1,6 +1,6 @@
 # Ansible
-vault-pass
-group_vars/
+.vault-pass
+group_vars/group_vars/guardicore_ubuntu.yml
 
 
 # Byte-compiled / optimized / DLL files

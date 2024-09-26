@@ -1,6 +1,0 @@
-plugin: community.general.linode
-keyed_groups:
-  - key: tags
-    separator: ''
-groups:
-  guardicore_ubuntu: "'guardicore' in (tags|list) and 'ubuntu' in (tags|list)"
