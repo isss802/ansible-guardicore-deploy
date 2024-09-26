@@ -1,40 +1,38 @@
 # Ansible Guardicore Deployment
 
-## 概要
+## Overview
 
-このAnsibleプロジェクトは、Guardicoreエージェントを複数のLinuxサーバーに効率的にデプロイするサンプルになります。
-Debian系のディストリビューションに対応しています。
+This Ansible project serves as a sample for efficiently deploying Guardicore agents to multiple Linux servers. It is compatible with Debian-based distributions.
 
-## プロジェクト構造
+## Project Structure
 
-```
 ./
 ├── ansible.cfg
 ├── group_vars
-│   └── guardicore_ubuntu.yml #別途作成
+│ └── guardicore_ubuntu.yml #create separately
 ├── guardicore.yml
 └── linode.yml
-```
 
-## 前提
+## Prerequisites
 
-- ssh_configが設定されており、Linodeインスタンスのラベル名がHostnameになっていること
-- LinodeインスタンスのタグにGuardicoreをインストールするためのタグを設定していること(サンプルではguardicoreとubuntuと付与されているのが対象)
+- `ssh_config` is set up, and the Linode instance label names are used as Hostnames.
+- Linode instances are tagged with the appropriate tags for Guardicore installation (in this sample, instances tagged with both 'guardicore' and 'ubuntu' are targeted).
 
-## 使用方法
+## Usage
 
-1. Vaultで利用するパスワードを生成
+1. Generate a password for Vault usage
+
 ```
 openssl rand -base64 32 > .vault-pass
 ```
 
-2. Linode Ansible Collectionをインストール
+2. Install Linode Ansible Collection
 
 ```
 ansible-galaxy collection install linode.cloud
 ```
 
-3. Guardicoreエージェントのインストールするための変数を`group-vars`に作成します。(`guardicore_ubuntu.yml`)
+3. Create variables for Guardicore agent installation in group-vars (guardicore_ubuntu.yml)
 
 ```
 ansible-vault edit group_vars/guardicore_ubuntu.yml
@@ -43,7 +41,7 @@ ansible-vault edit group_vars/guardicore_ubuntu.yml
 ```
 # Guardicore
 
-## 基本URLを変数化
+## Base URL variable
 gc_base_url: 'aggr-xxxxxxxxxxxx.cloud.guardicore.com'
 
 ## Install Profile
@@ -56,20 +54,26 @@ gc_cert_path: '/tmp/guardicore_cas_chain_file.pem'
 gc_get_install_file_cmd: 'wget --ca-certificate={{ gc_cert_path }} -O /tmp/guardicore_install.sh https://{{ gc_base_url }}'
 gc_installation_cmd: 'sudo -E bash /tmp/guardicore_install.sh'
 ```
-4. LinodeのAPI Tokenを設定
 
-envrcを利用することをおすすめ
+4. Set up Linode API Token:
+
+To dynamically retrieve the current list of instances using the Ansible dynamic inventory plugin for Linode, follow these steps:
+Use the Ansible dynamic inventory plugin for Linode. You can find detailed information about this plugin at:
+https://docs.ansible.com/ansible/latest/collections/community/general/linode_inventory.html
+For setting environment variables, we recommend using envrc.
+This approach allows you to dynamically fetch and manage your Linode instances within your Ansible environment, providing an up-to-date inventory for your playbooks
 
 ```
 export LINODE_ACCESS_TOKEN=xxxxxxxxxx
 ```
 
-5. 以下のコマンドを実行してプレイブックを実行します：
+5. Run the playbook with the following command:
 
 ```
 ansible-playbook guardicore_deploy.yml
 ```
 
-## ライセンス
+# License
 
-このプロジェクトはMITライセンスの下で公開されています。詳細については、LICENSEファイルを参照してください。
+This project is released under the MIT License. For more details, please refer to the LICENSE file.
+text
