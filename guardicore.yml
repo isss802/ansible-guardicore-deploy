@@ -1,0 +1,75 @@
+---
+- name: Guardicoreインストールプレイブック
+  hosts: guardicore_ubuntu
+  become: yes
+
+  tasks:
+    - name: Guardicore証明書のダウンロード
+      ansible.builtin.get_url:
+        url: "{{ gc_cert_url }}"
+        dest: "{{ gc_cert_path }}"
+        validate_certs: no
+
+    - name: ダウンロードした証明書のチェックサム計算
+      ansible.builtin.command:
+        cmd: sha256sum "{{ gc_cert_path }}"
+      register: sha256sum_output
+
+    - name: 計算されたチェックサム値の設定
+      ansible.builtin.set_fact:
+        calculated_checksum: "{{ sha256sum_output.stdout.split()[0] }}"
+
+    - name: 証明書チェックサムの検証
+      ansible.builtin.debug:
+        msg: "証明書のチェックサムが一致しました。インストールを続行します。"
+      when: calculated_checksum == gc_expected_checksum
+
+    - name: チェックサム不一致エラーの表示
+      ansible.builtin.debug:
+        msg: "証明書のチェックサムが一致しません"
+      when: calculated_checksum != gc_expected_checksum
+
+    - name: Guardicoreエージェントの状態確認
+      ansible.builtin.command:
+        cmd: gc-agent status
+      register: gc_agent_status
+      ignore_errors: yes
+
+    - name: Guardicoreインストールファイルの取得
+      ansible.builtin.shell: "{{ gc_get_install_file_cmd }}"
+      args:
+        executable: /bin/bash
+      when: 
+        - calculated_checksum == gc_expected_checksum
+        - gc_agent_status.rc != 0
+
+    - name: チェックサムが一致した場合、インストールコマンドを実行
+      ansible.builtin.shell: |
+        export UI_UM_PASSWORD={{ gc_ui_um_password }}
+        export GC_PROFILE={{ gc_profile }}
+        export SSL_ADDRESSES={{ gc_ssl_addresses }}
+        {{ gc_installation_cmd }}
+      args:
+        executable: /bin/bash
+      when: 
+        - calculated_checksum == gc_expected_checksum
+        - gc_agent_status.rc != 0
+
+    - name: gc-agentサービスの状態を確認する
+      ansible.builtin.command:
+        cmd: systemctl is-enabled gc-agent
+      register: gc_agent_status
+      changed_when: false
+      failed_when: false
+      when: 
+        - calculated_checksum == gc_expected_checksum
+        - gc_agent_status.rc != 0
+
+    - name: gc-agentサービスを有効化する
+      ansible.builtin.systemd:
+        name: gc-agent
+        enabled: yes
+      when: 
+        - gc_agent_status.stdout != "enabled"
+        - calculated_checksum == gc_expected_checksum
+        - gc_agent_status.rc != 0
