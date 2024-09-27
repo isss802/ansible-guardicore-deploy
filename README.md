@@ -11,13 +11,13 @@ This Ansible project serves as a sample for efficiently deploying Guardicore age
 ├── ansible.cfg
 ├── group_vars
 │ └── guardicore_ubuntu.yml #create separately
-├── guardicore.yml
+├── guardicore_deploy.yml
 └── linode.yml
 ```
 
 ## Prerequisites
 
-- `ssh_config` is set up, and the Linode instance label names are used as Hostnames.
+- `sshd_config` is set up, and the Linode instance label names are used as Hostnames.
 - Linode instances are tagged with the appropriate tags for Guardicore installation (in this sample, instances tagged with both 'guardicore' and 'ubuntu' are targeted).
 
 ## Usage
